@@ -34,6 +34,8 @@ $ git clone --recurse-submodules git@github.com:kennyhyun/pobox.git
 $ yarn && yarn bootstrap
 ```
 
+`storage/.env` is required for the minio. Copy storage/.env.sample to storage/.env before starting.
+
 ```
 $yarn start
 ```
