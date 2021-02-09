@@ -1,3 +1,6 @@
 [submodule "storage"]
 	path = storage
-	url = git@github.com:kennyhyun/nodejs-s3-thumbnail-generator.git
+	url = https://github.com:kennyhyun/nodejs-s3-thumbnail-generator.git
+[submodule "alpine-cron"]
+	path = alpine-cron
+	url = https://github.com/kennyhyun/alpine-cron.git

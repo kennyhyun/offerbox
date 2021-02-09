@@ -1,0 +1,23 @@
+version: '3.5'
+
+services:
+  redis:
+    image: redis:6.0.10-alpine
+    networks:
+      - traefik
+
+  mysql:
+    image: mysql:5.6
+    networks:
+      - traefik
+    env_file:
+      - ./.env.mysql
+    #volumes:
+    #  - config/latest-schema.sql:/docker-entrypoint-initdb.d/latest-schema.sql
+    ports:
+      - 13306:3306
+
+networks:
+  traefik:
+    driver: bridge
+    name: traefik

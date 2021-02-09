@@ -42,6 +42,10 @@ $yarn start
 
 This is running traefik with nginx, minio, and thumbnail generator for now.
 
+### Config
+
+To allow public access to the bucket, refer https://github.com/kennyhyun/nodejs-s3-thumbnail-generator#make-the-minio-bucket-public
+
 ## TODOs
 
 - [ ] Sign in/up

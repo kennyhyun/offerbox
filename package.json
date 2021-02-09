@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "bootstrap": "yarn && yarn --cwd storage && cp storage/.env.sample storage/.env",
-    "start": "yarn --cwd storage start",
-    "stop:docker": "yarn --cwd storage stop",
+    "dc": "docker-compose",
+    "start": "yarn dc up -d && yarn --cwd storage start",
+    "stop:docker": "yarn dc stop && yarn --cwd storage stop",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {},
