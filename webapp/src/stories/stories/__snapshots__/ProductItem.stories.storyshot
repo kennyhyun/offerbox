@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Producte/ProductItem Primary 1`] = `
+<div
+  className="MuiPaper-root MuiCard-root makeStyles-root-1 makeStyles-root-5 MuiPaper-elevation1 MuiPaper-rounded"
+>
+  <div
+    className="MuiCardContent-root"
+  >
+    <p
+      className="MuiTypography-root makeStyles-title-3 MuiTypography-body1 MuiTypography-colorTextSecondary MuiTypography-gutterBottom"
+    >
+      Product
+    </p>
+    <h2
+      className="MuiTypography-root MuiTypography-h5"
+    >
+      Product Title
+    </h2>
+    <p
+      className="MuiTypography-root makeStyles-pos-4 MuiTypography-body1 MuiTypography-colorTextSecondary"
+    >
+      Superior product
+    </p>
+  </div>
+</div>
+`;
