@@ -9,12 +9,15 @@ const endpoints = {
 };
 
 const constants = {
+  pageSize: 24,
+  subdir: 'raw-json/',
   jsonExtension: '.json',
   categoryFilename: 'woolworths.categories',
   productFilename: 'woolworths.products',
 };
 
-const getFilename = ({ objectId, subkeys = [] }) => `${[objectId, ...subkeys].join('-')}${constants.jsonExtension}`;
+const getFilename = ({ objectId, subkeys = [] }) =>
+  `./${constants.subdir}${[objectId, ...subkeys].join('-')}${constants.jsonExtension}`;
 const saveToFile = async ({ objectId, subkeys = [], json }) => {
   const filename = getFilename({ objectId, subkeys });
   const data = JSON.stringify(json, null, 2);
@@ -29,10 +32,13 @@ const loadFromFile = async ({ objectId, subkeys }) => {
 };
 const save = saveToFile;
 const load = loadFromFile;
-const pageSize = 24;
+
+const getDiscountRateString = ({ price, originalPrice }) =>
+  `${Number((((originalPrice - price) / originalPrice) * 20).toFixed()) * 5}%`;
 
 const fetchProductsInCategory = async ({ key, id, desc, pageNumber = 1 }) => {
-  const objectParams = { objectId: constants.productFilename, subkeys: [key, pageNumber] };
+  const { pageSize, productFilename } = constants;
+  const objectParams = { objectId: productFilename, subkeys: [key, pageNumber] };
   let products = await load(objectParams);
   if (!products) {
     const location = `/shop/browse/${key}`;
@@ -41,7 +47,7 @@ const fetchProductsInCategory = async ({ key, id, desc, pageNumber = 1 }) => {
       location,
       url: location,
       pageNumber,
-      pageSize: 24,
+      pageSize,
       sortType: 'PriceDesc',
       formatObject: `{"name": "${desc}"}`,
     });
@@ -49,28 +55,40 @@ const fetchProductsInCategory = async ({ key, id, desc, pageNumber = 1 }) => {
     save({ ...objectParams, json: products }).catch(e => console.error('Failed to save', objectId));
   }
   const { TotalRecordCount: totalCount, Bundles: bundles } = products;
-  console.log('------------', key, '------------');
+  console.log('------------', key, '-', pageNumber, '------------');
   console.log(
     JSON.stringify(
       bundles &&
-        bundles.map(({ Products, Name: name }) => {
-          return {
-            name,
-            products: Products.map(
-              ({ Name: name, Stockcode: code, Price: price, InstorePrice: actualPrice, Unit: unit }) => ({
-                code,
-                price,
-                actualPrice,
-                unit,
-              })
-            ),
-          };
-        }),
+        bundles
+          .map(({ Products, Name: name }) => {
+            return {
+              name,
+              products: Products.map(
+                ({
+                  Name: name,
+                  Stockcode: code,
+                  WasPrice: originalPrice,
+                  Price: price,
+                  InstorePrice: instorePrice,
+                  Unit: unit,
+                  IsAvailable: available,
+                }) => ({
+                  code,
+                  price: instorePrice || price,
+                  originalPrice,
+                  unit,
+                  available,
+                  ...(price !== originalPrice ? { discountRate: getDiscountRateString({ originalPrice, price }) } : {}),
+                })
+              ),
+            };
+          })
+          .filter(({ products: [it] }) => it.available && it.discountRate),
       null,
       2
     )
   );
-  if (!totalCount || pageNumber > (totalCount / pageSize)) return;
+  if (!totalCount || pageNumber > totalCount / pageSize) return;
   fetchProductsInCategory({ key, id, desc, pageNumber: pageNumber + 1 });
 };
 
@@ -79,7 +97,7 @@ const fetchCategories = async info => {
     await p;
     const { id, desc } = info[key];
     await fetchProductsInCategory({ key, id, desc });
-    if (idx === 2) throw new Error('break');
+    if (idx === 6) throw new Error('break');
   }, null);
 };
 
