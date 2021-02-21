@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { promises: fsp } = require('fs');
+const { FileCache } = require('./lib/cache');
 
 const endpoints = {
   categories: 'https://www.woolworths.com.au/apis/ui/PiesCategoriesWithSpecials',
@@ -16,22 +16,10 @@ const constants = {
   productFilename: 'woolworths.products',
 };
 
-const getFilename = ({ objectId, subkeys = [] }) =>
-  `./${constants.subdir}${[objectId, ...subkeys].join('-')}${constants.jsonExtension}`;
-const saveToFile = async ({ objectId, subkeys = [], json }) => {
-  const filename = getFilename({ objectId, subkeys });
-  const data = JSON.stringify(json, null, 2);
-  return fsp.writeFile(filename, data);
-};
-const loadFromFile = async ({ objectId, subkeys }) => {
-  const filename = getFilename({ objectId, subkeys });
-  return fsp
-    .readFile(filename, 'utf8')
-    .then(str => JSON.parse(str))
-    .catch(() => {});
-};
-const save = saveToFile;
-const load = loadFromFile;
+const fileCache = new FileCache({ subdir: constants.subdir, jsonExtension: constants.jsonExtension });
+
+const save = fileCache.save.bind(fileCache);
+const load = fileCache.load.bind(fileCache);
 
 const getDiscountRateString = ({ price, originalPrice }) =>
   `${Number((((originalPrice - price) / originalPrice) * 20).toFixed()) * 5}%`;
