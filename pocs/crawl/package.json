@@ -12,9 +12,12 @@
   "dependencies": {
     "axios": "^0.21.1",
     "chrome-aws-lambda": "^7.0.0",
+    "parse5": "^6.0.1",
+    "parse5-htmlparser2-tree-adapter": "^6.0.1",
     "puppeteer": "^7.1.0",
     "puppeteer-extra": "^3.1.17",
     "puppeteer-extra-plugin-adblocker": "^2.11.10",
-    "puppeteer-extra-plugin-stealth": "^2.7.5"
+    "puppeteer-extra-plugin-stealth": "^2.7.5",
+    "ramda": "^0.27.1"
   }
 }
