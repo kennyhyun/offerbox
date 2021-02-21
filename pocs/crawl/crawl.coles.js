@@ -14,6 +14,7 @@ if (!akBmcrf) {
 }
 
 const constants = {
+  maxPage: 50,
   categoryLevel: 2,
   cachePrefix: 'coles.browse',
   userAgent:
@@ -30,7 +31,7 @@ const constants = {
 const source = new FetchSource({
   userAgent: constants.userAgent,
   baseUrl: constants.baseUrl,
-  cookieStringArray: `ak_bmcrf=${akBmcrf}`,
+  cookieStringArray: [`ak_bmcrf=${akBmcrf}`],
   cache: new FileCache({ subdir: 'raw-json/coles/', jsonExtension: '.json' }),
 });
 
@@ -110,18 +111,25 @@ const parseMinificationCodes = async tree => {
   return JSON.parse(minificationCodes);
 };
 
-const fetchProductsHtml = async dir => {
-  const productObjectParams = { objectId: `${constants.cachePrefix}.products${dir.replace(/\//g, '_')}` };
+const fetchProductsHtml = async (dir, page = 1) => {
+  const productObjectParams = {
+    objectId: `${constants.cachePrefix}.products${dir.replace(/\//g, '_')}`,
+    subkeys: [page],
+  };
   return source.fetchColesHtml({
     objectParams: productObjectParams,
-    path: PATH.join(constants.endpoints.ajaxCategoryBase, dir),
+    path: `${PATH.join(constants.endpoints.ajaxCategoryBase, dir)}?beginIndex=${page - 1}`,
   });
 };
 
 const mapKeys = ({ products, map }) => {
   const [product] = products;
 
-  const mapKeys = R.compose(R.fromPairs, R.map(([k, v]) => [map[k], v]), R.toPairs);
+  const mapKeys = R.compose(
+    R.fromPairs,
+    R.map(([k, v]) => [map[k], v]),
+    R.toPairs
+  );
 
   const mapObjectKeys = obj => {
     Object.keys(obj).forEach(k => {
@@ -138,6 +146,22 @@ const mapKeys = ({ products, map }) => {
 
 const categoryObjectParams = { objectId: constants.cachePrefix };
 
+const fetchProducts = async ({ directory, page = 1, minificationCodes }) => {
+  const productsHtml = await fetchProductsHtml(directory, page);
+  const parsedProducts = parse5.parse(productsHtml, { treeAdapter: htmlparser2Adapter });
+  const parsedProductsData = await parseColesProductData(parsedProducts);
+  const {
+    searchInfo: { totalCount, pageSize },
+    products: productSourceData,
+    ...prodData
+  } = parsedProductsData;
+  const products = mapKeys({ map: minificationCodes, products: productSourceData });
+  if (totalCount > pageSize * page && page < constants.maxPage) {
+    products.push(...(await fetchProducts({ directory, page: page + 1, minificationCodes })));
+  }
+  return products;
+};
+
 source
   .fetchColesHtml({ objectParams: categoryObjectParams, path: constants.endpoints.browse })
   .then(async htmlString => {
@@ -149,20 +173,16 @@ source
     // console.log(JSON.parse(data['all-categories']));
     const categories = findCategories(JSON.parse(data['all-categories']).catalogGroupView);
     // // .reduce((ext, cat) => [...ext, findCategories(cat)], []);
-    console.log(JSON.stringify(categories, null, 2));
-    await categories.reduce(async (p, category) => {
+    // console.log(JSON.stringify(categories, null, 2));
+    console.log(categories);
+    await categories.reduce(async (p, category, idx) => {
       await p;
       const { path } = category;
-      const productsHtml = await fetchProductsHtml(path);
-      console.log(productsHtml);
-      const parsedProducts = parse5.parse(productsHtml, { treeAdapter: htmlparser2Adapter });
-      console.log(parsedProducts);
-      // print(parsedProducts, 'html body div div div div div div div div[data-colrs-transformer]');
-      // print(parsedProducts, 'html div[data-colrs-transformer]');
-      const productsDataSource = await parseColesProductData(parsedProducts);
-      const products = mapKeys({ map: minificationCodes, products: productsDataSource.products });
-      console.log(products);
-      throw new Error('break');
+      const products = await fetchProducts({ directory: path, minificationCodes });
+
+      // console.log(products);
+      console.log(JSON.stringify(products, null, 2));
+      if (idx >= 3) throw new Error('break');
     }, null);
   })
   .catch(console.error);

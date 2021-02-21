@@ -50,6 +50,8 @@ class FetchSource {
     });
     // add new
     headers.Cookie.push(...cookies);
+    const bmcrf = headers.Cookie.find(c => c.startsWith('ak_bmcrf'));
+    console.log('Updatied ak_bmcrf', bmcrf);
   }
 }
 
