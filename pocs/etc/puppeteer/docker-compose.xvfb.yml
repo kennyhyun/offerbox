@@ -1,0 +1,13 @@
+version: '3'
+services:
+  puppeteer:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.xvfb
+    ports: 
+      - 8080:8080
+      - 9229:9229
+    volumes:
+      - ./screenshots:/app/screenshots
+    command: bash -c "Xvfb :99 -screen 0 1024x768x16 & npm start"
+

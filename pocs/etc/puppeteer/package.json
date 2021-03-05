@@ -1,0 +1,21 @@
+{
+  "name": "puppeteer-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "chrome-aws-lambda.js",
+  "scripts": {
+    "dc": "docker-compose -f docker-compose.xvfb.yml",
+    "start:docker": "yarn dc up puppeteer",
+    "start": "node puppeteer-extra",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "puppeteer": "^7.1.0",
+    "puppeteer-extra": "^3.1.17",
+    "puppeteer-extra-plugin-adblocker": "^2.11.10",
+    "puppeteer-extra-plugin-stealth": "^2.7.5"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
