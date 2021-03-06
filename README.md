@@ -25,7 +25,7 @@ $ git submodule update
 Or alternatively, clone with the `--recurse-submodules` option
 
 ```
-$ git clone --recurse-submodules git@github.com:kennyhyun/pobox.git
+$ git clone --recurse-submodules git@github.com:kennyhyun/offerbox.git
 ``` 
 
 ### Running
