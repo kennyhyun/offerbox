@@ -10,6 +10,7 @@
     "stop:docker": "yarn dc stop && yarn --cwd storage stop",
     "start:client": "yarn --cwd webapp start",
     "build:client": "yarn --cwd webapp build",
+    "ci": "yarn test:client",
     "test:client": "yarn --cwd webapp test",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
